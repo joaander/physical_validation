@@ -35,4 +35,5 @@ from .observable_data import ObservableData
 from .system_data import SystemData
 # Parsers
 from .gromacs_parser import GromacsParser
+from .hoomd_parser import HOOMDParser
 from .flatfile_parser import FlatfileParser
