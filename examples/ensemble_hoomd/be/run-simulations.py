@@ -1,7 +1,7 @@
 import hoomd, hoomd.md
 import math
 
-kT = dict(low=1.0, high=1.03)
+kT = dict(low=1.2, high=1.27)
 
 for name in kT:
 
@@ -16,34 +16,36 @@ for name in kT:
     # define interactions
     nl = hoomd.md.nlist.cell()
     lj = hoomd.md.pair.lj(r_cut=2.5, nlist=nl)
-    lj.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0)
-    lj.set_params(mode='shift')
+    lj.pair_coeff.set('A', 'A', epsilon=1.0, sigma=1.0, r_on=2.0)
+    lj.set_params(mode='xplor')
 
     # use langevin integrator to thermalize velocities
     # note: hoomd v2.3 will include a random velocity command that can replace this
-    hoomd.md.integrate.mode_standard(dt=0.005)
+    hoomd.md.integrate.mode_standard(dt=0.002)
     langevin = hoomd.md.integrate.langevin(group=all, kT=kT[name], seed=4)
-    zero = hoomd.md.update.zero_momentum(period=1e6, phase=100)
     hoomd.run(100)
+    zero = hoomd.md.update.zero_momentum(period=1)
+    hoomd.run(1)
+    zero.disable()
     langevin.disable()
 
     # NVT integration
-    nvt = hoomd.md.integrate.berendsen(group=all, kT=kT[name], tau=0.5)
+    nvt = hoomd.md.integrate.berendsen(group=all, kT=kT[name], tau=1.0)
 
     # equilibrate
-    hoomd.run(10e3)
+    hoomd.run(100e3)
 
     # sample
     hoomd.analyze.log(filename="{0}.log".format(name),
                       quantities=['kinetic_energy', 'potential_energy', 'volume', 'pressure', 'temperature'],
-                      period=500,
+                      period=250,
                       overwrite=True)
     hoomd.dump.gsd(filename="{0}.gsd".format(name),
-                   period=500,
+                   period=250,
                    group=all,
                    phase=0,
                    dynamic=['momentum'],
                    overwrite=True)
-    hoomd.run(2.5e6)
+    hoomd.run(1e6)
     hoomd.meta.dump_metadata(filename="{0}.json".format(name))
 

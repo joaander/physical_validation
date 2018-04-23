@@ -27,17 +27,13 @@ for name in kT:
     zero = hoomd.md.update.zero_momentum(period=1)
     hoomd.run(1)
     zero.disable()
-    langevin.disable()
-
-    # NVT integration
-    nvt = hoomd.md.integrate.nvt(group=all, kT=kT[name], tau=0.5)
 
     # equilibrate
     hoomd.run(100e3)
 
     # sample
     hoomd.analyze.log(filename="{0}.log".format(name),
-                      quantities=['kinetic_energy', 'potential_energy', 'volume', 'pressure', 'temperature', 'nvt_mtk_reservoir_energy_all'],
+                      quantities=['kinetic_energy', 'potential_energy', 'volume', 'pressure', 'temperature'],
                       period=250,
                       overwrite=True)
     hoomd.dump.gsd(filename="{0}.gsd".format(name),

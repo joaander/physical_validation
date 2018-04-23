@@ -2,6 +2,7 @@ import hoomd, hoomd.md
 import math
 
 kT = dict(low=1.2, high=1.27)
+P = dict(low=0.163, high=0.232)
 
 for name in kT:
 
@@ -30,14 +31,14 @@ for name in kT:
     langevin.disable()
 
     # NVT integration
-    nvt = hoomd.md.integrate.nvt(group=all, kT=kT[name], tau=0.5)
+    npt = hoomd.md.integrate.npt(group=all, kT=kT[name], tau=0.5, P=P[name], tauP=0.5)
 
     # equilibrate
     hoomd.run(100e3)
 
     # sample
     hoomd.analyze.log(filename="{0}.log".format(name),
-                      quantities=['kinetic_energy', 'potential_energy', 'volume', 'pressure', 'temperature', 'nvt_mtk_reservoir_energy_all'],
+                      quantities=['kinetic_energy', 'potential_energy', 'volume', 'pressure', 'temperature', 'npt_thermostat_energy', 'npt_barostat_energy'],
                       period=250,
                       overwrite=True)
     hoomd.dump.gsd(filename="{0}.gsd".format(name),

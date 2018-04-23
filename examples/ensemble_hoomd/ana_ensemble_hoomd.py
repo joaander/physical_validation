@@ -1,7 +1,7 @@
 import physical_validation as pv
 import os
 
-systems = ['be', 'nvt']
+systems = ['nvt', 'npt', 'be', 'langevin']
 
 parser = pv.data.HOOMDParser()
 
@@ -26,11 +26,11 @@ for sys in systems:
 
     print('\n## Validating kinetic energy distribution (strict)')
     print('# Low T:')
-    pv.kinetic_energy.distribution(res_low, verbosity=2, strict=True,
-                                   filename=sysplot + '_low_mb')
+    pv.kinetic_energy.distribution(res_low, verbosity=2, strict=True)
+    #                               filename=sysplot + '_low_mb')
     print('# High T:')
-    pv.kinetic_energy.distribution(res_high, verbosity=2, strict=True,
-                                   filename=sysplot + '_high_mb')
+    pv.kinetic_energy.distribution(res_high, verbosity=2, strict=True)
+    #                               filename=sysplot + '_high_mb')
 
     print('\n## Validating kinetic energy distribution (non-strict)')
     print('# Low T:')
@@ -43,8 +43,8 @@ for sys in systems:
         # can't plot in 2d...
         quantiles = pv.ensemble.check(res_low, res_high, verbosity=2)
     else:
-        quantiles = pv.ensemble.check(res_low, res_high, verbosity=2,
-                                      filename=sysplot + '_ensemble')
+        quantiles = pv.ensemble.check(res_low, res_high, verbosity=2)
+        #                              filename=sysplot + '_ensemble')
     if len(quantiles) == 1:
         q_str = '{:.1f}'.format(quantiles[0])
     else:
