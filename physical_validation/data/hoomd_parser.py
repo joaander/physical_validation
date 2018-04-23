@@ -134,6 +134,11 @@ class HOOMDParser(parser.Parser):
         system.mass = traj[0].particles.mass;
 
         # TODO: handle molecules/constraints/bonds
+        # Note: HOOMD has internal knowledge of the number of degrees of freedom, it seems that system.nconstraints
+        # is only used to compute the degrees of freedom of the system. We could abuse this field and simply
+        # insert a nconstraints value appropriate to set the number of degrees of freedom to match hoomd's.
+        # this would also allow for testing 2D and simulations with orientation degrees of freedom (though
+        # not with the equipartition analysis engine)
 
         # read log
         log_data = numpy.genfromtxt(fname=log_filename, names=True);
@@ -158,9 +163,9 @@ class HOOMDParser(parser.Parser):
             temperature = metadata['hoomd.md.integrate.langevin'][0]['kT']/result.units.kb
         elif 'hoomd.md.integrate.npt' in metadata:
             ens = 'NPT';
-            pressure = metadata['hoomd.md.integrate.npt'][0]['P']
+            pressure = metadata['hoomd.md.integrate.npt'][0]['S'][0]
             temperature = metadata['hoomd.md.integrate.npt'][0]['kT']/result.units.kb
-            conserved_quantity = numpy.array(log_data['kinetic_energy'] + log_data['potential_energy'] + log_data['npt_mtk_reservoir_energy_all'])
+            conserved_quantity = numpy.array(log_data['kinetic_energy'] + log_data['potential_energy'] + log_data['npt_thermostat_energy'] + log_data['npt_barostat_energy'])
         elif 'hoomd.md.integrate.nve' in metadata:
             ens = 'NVE';
             volume = log_data['volume'][0]
